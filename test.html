@@ -1,0 +1,105 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title> New Document </title>
+<meta name="Generator" content="EditPlus">
+<meta name="Author" content="">
+<meta name="Keywords" content="">
+<meta name="Description" content="">
+<script src="jpath.js" /></script>
+</head>
+
+<body>
+
+<script>
+
+var myobj = {
+	'rss':{
+		'@version':1.5,
+		'@ns':'red',
+		'@max':500,
+		'item':[
+			{ 'title' : 'the first blog of the day',
+			  'url' : 'http://bluelinecity.com/2007/12/12/hih',
+			  'pubDate' : '2006-12-12',
+			  'active' : false,
+			  'enclosure' : {
+					'@url' : 'http://bluelinecity.com/_files/3.mp3',
+					'@filesize' : 23
+			  },
+			},
+			{ 'title' : 'the second blog of the day',
+			  'url' : 'http://bluelinecity.com/2007/12/12/hih',
+			  'pubDate' : '2007-12-12',
+			  'active' : true,
+			  'enclosure' : {
+					'@url' : 'http://bluelinecity.com/_files/5.mp3',
+					'@filesize' : 234
+			  },
+         },
+			{ 'title' : 'the third blog of the day',
+			  'url' : 'http://bluelinecity.com/2007/12/12/423',
+			  'pubDate' : '2008-12-12',
+			  'active' : true,
+			  'enclosure' : {
+					'@url' : 'http://bluelinecity.com/_files/6.mp3',
+					'@filesize' : 2343
+			  },
+			}
+		]
+	}
+};
+
+function pr (v){document.write(v + '<br>'); }
+
+pr(myobj.rss['@version']);
+
+var jp = new JPath( myobj );
+
+pr(jp.$('rss').$('@version').json);
+pr(jp.$('rss/@version').json);
+pr(jp.query('rss/@version'));
+
+pr(jp.$('rss').$('item').$(5).$('title').json);
+pr(jp.query('rss/item[5]/title'));
+pr(jp.query('/rss/@max'));
+
+pr(jp.$('rss').$('item').$(function(j){ with(j){return($('active').json);} }).$('title').json);
+pr(jp.$('rss/item').f("!$('active').json").$('title').json);
+
+pr(jp.query('rss/*[active]/title'));
+
+//pr(jp.query('rss/item[enclosure/@filesize > /rss/@max - 500]/title'));
+
+pr(jp.$('rss').$('item').f("$('enclosure').$('@filesize').json > parent().$('rss/@max').json-500").$('title').json);
+
+pr(jp.$('rss/item').f('position() == 1').$('title').json);
+pr(jp.query('rss/item[position() == 1]/title'));
+
+pr(jp.$('rss/item').f('last()').$('title').json);
+
+//token types // midpoint node selection, endpoint node selection, predicate condition
+
+var a = new JPath(window);
+
+
+/*
+/rss/item[active = true]
+/rss/item[ count(posts) > 3 ]
+
+jp.$('rss').$('item').$(function(j){ with(j){ count($('posts)) > 3 } }).json
+
+/rss/item[last(./posts)]
+
+anything that matches /node/node]
+
+*/
+
+//pr(js.query('/rss/item[active]/title'));
+
+// query('rss/item/[acti]/title
+
+</script>
+
+</body>
+</html>
