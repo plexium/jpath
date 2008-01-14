@@ -74,7 +74,7 @@ pr(jp.query('rss/*[active]/title'));
 pr(jp.$('rss').$('item').f("$('enclosure').$('@filesize').json > parent().$('rss/@max').json-500").$('title').json);
 
 pr(jp.$('rss/item').f('position() == 1').$('title').json);
-pr(jp.query('rss/item[position() == 1]/title'));
+pr(jp.query('rss/item[ position() == 1 ]/title'));
 
 pr(jp.$('rss/item').f('last()').$('title').json);
 

@@ -1,47 +1,4 @@
 /*
-
-XPath for JSON
-
-Working Draft
-
-/tagname = jpath.$('tagname').done()
-
-//tagname = jpath.$$('tagname').done()
-
-/tagname[3] = jpath.$('tagname').A(3).done()
-
-/tag[name='b'] = jpath.$('tag', function(j){ return (j.$('name')=='b')} ).done()
-
-var jpath = new JPath( jsonrss );
-
-items = jpath.$('rss').$('item')._(1).json;
-
-currently supports
-
-/tagname
-tagname
-* wildcard
-[] predicates
-equality
-math
-array selection
-
-Expression  	
-nodename 	   
-/ 	            
-// 	         
-. 	            
-.. 	         
-*
-nodename[0]
-nodename[last()]
-nodename[position()]
-nodename[last()-1]
-nodename[somenode > 3]/node
-
-*/
-
-/*
    JPath 1.0 - json equivalent to xpath
    Copyright (C) 2007  Bryan English <bryan at bluelinecity dot com>
 
@@ -66,9 +23,35 @@ nodename[somenode > 3]/node
       var somevalue = jpath.$('book/title').json;
          //or
       var somevalue = jpath.query('book/title');
+
+/tagname
+tagname
+* wildcard
+[] predicates
+equality
+math
+array selection
+
+Expression  	
+nodename 	   
+/ 	            
+// 	         
+. 	            
+.. 	         
+*
+nodename[0]
+nodename[last()]
+nodename[position()]
+nodename[last()-1]
+nodename[somenode > 3]/node
      
 */
-function JPath( json, parent ){ this.json = json; this._parent = parent; }
+
+function JPath( json, parent )
+{ 
+    this.json = json; 
+    this._parent = parent; 
+}
 
 JPath.prototype = {
 
@@ -84,10 +67,21 @@ JPath.prototype = {
    */
    parent: null,
 
+   /*
+      Method: $
+      Performs a find query on the current jpath object.
+
+      Parameters:
+        str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
+
+      Return:
+        jpath - Returns the resulting jpath object after performing find query.
+
+   */
    '$': function ( str )
    {
       if ( this.json )
-      {       
+      {
          if ( typeof(str) == 'string' && str.indexOf('/') != -1)
          {
             var strs = str.split('/');
@@ -102,13 +96,13 @@ JPath.prototype = {
          else if ( typeof(str) == 'string' && ( this.json instanceof Array || str == '*' ))
          {   
             var a = new Array();
-            for ( i in this.json )
+            for ( var i in this.json )
             {
                if ( typeof(this.json[i]) != 'function' )
                {                   
                   if ( str == '*' )
                   {
-                     for ( j in this.json[i] )
+                     for ( var j in this.json[i] )
                      {
                         if ( typeof(this.json[i][j]) != 'function' )
                         {
@@ -141,11 +135,18 @@ JPath.prototype = {
       return new JPath( null, this );
    },
 
-   root: function ()
-   {
-      return ( this._parent ? this._parent.root() : this );
-   },
+   /*
+      Method: query (beta)
+      Performs a find query on the current jpath object using a single string similar to xpath. This method
+      is currently expirimental.
 
+      Parameters:
+        str - string, full xpath-like query to perform on the current object.
+
+      Return:
+        mixed - Returns the resulting json value after performing find query.
+
+   */
    query: function( str )
    {
       var re = {
@@ -168,7 +169,7 @@ JPath.prototype = {
          str = str.replace(quotes,'%'+ (saves.length-1) +'%');
       }
 
-      for ( e in re )
+      for ( var e in re )
       {
          str = str.replace( new RegExp(e,'ig'), re[e] );
       }
@@ -176,6 +177,19 @@ JPath.prototype = {
       return eval('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
    },
 
+   /*
+      Method: f
+      Performs the equivilant to an xpath predicate eval on the current nodeset.
+
+      Parameters:
+        f - function, an iterator function that is executed for every json node and is expected to return a boolean
+        value which determines if that particular node is selected. Alternativly you can submit a string which will be
+        inserted into a prepared function.
+
+      Return:
+        jpath - Returns the resulting jpath object after performing find query.
+
+   */
    f: function ( f )
    {
       var a = new Array();
@@ -185,7 +199,7 @@ JPath.prototype = {
          f = eval('function(j){with(j){return('+f+');}}');
       }
 
-      for ( p in this.json )
+      for ( var p in this.json )
       {
          var j = new JPath(this.json[p], this);
          j.index = p;
@@ -198,19 +212,53 @@ JPath.prototype = {
       return new JPath( a, this );
    },
 
+   /*
+      Method: parent
+      Returns the parent jpath object or itself if its the root node
+
+      Return:
+        jpath - Returns the parent jpath object or itself if its the root node
+
+   */
    parent: function()
    {
       return ( (this._parent) ? this._parent : this );
    },
 
+   /*
+      Method: position
+      Returns the index position of the current node. Only valid within a function or predicate
+
+      Return:
+        int - array index position of this json object.
+   */
    position: function()
    {
       return this.index;
    },
 
+   /*
+      Method: last
+      Returns true if this is the last node in the nodeset. Only valid within a function or predicate
+
+      Return:
+        booean - Returns true if this is the last node in the nodeset
+   */
    last: function()
    {
       return (this.index == (this._parent.json.length-1));
+   },
+
+   /*
+      Method: root
+      Returns the root jpath object.
+
+      Return:
+        jpath - The top level, root jpath object.
+   */
+   root: function ()
+   {
+      return ( this._parent ? this._parent.root() : this );
    },
 
 };
