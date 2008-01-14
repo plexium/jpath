@@ -80,59 +80,71 @@ JPath.prototype = {
    */
    '$': function ( str )
    {
-      if ( this.json )
+      var result = null;
+      var working = this;
+
+      if ( this.json && str )
       {
-         if ( typeof(str) == 'string' && str.indexOf('/') != -1)
+         switch ( typeof(str) )
          {
-            var strs = str.split('/');
-            var self = this;
-            for ( var i =0; i < strs.length; i++ )
-            {
-               self = self.$(strs[i]);
-            }
+            case 'function':
+               result = this.f(str).json;
+            break;
 
-            return self;
-         }
-         else if ( typeof(str) == 'string' && ( this.json instanceof Array || str == '*' ))
-         {   
-            var a = new Array();
-            for ( var i in this.json )
-            {
-               if ( typeof(this.json[i]) != 'function' )
-               {                   
-                  if ( str == '*' )
+            case 'number':
+               result = this.json[str] || null;
+            break;
+
+            case 'string':
+               var names = str.split('/');     
+
+               //foreach slash delimited node name//
+               for ( var i=0; i<names.length ; i++ )
+               {
+                  var name = new RegExp('^' + names[i].replace(/\*/g,'.*') + '$');
+                  var isArray = (working.json instanceof Array);
+                  var a = new Array();
+                  
+                  //foreach working node property//
+                  for ( var p in working.json )
                   {
-                     for ( var j in this.json[i] )
+                     if ( typeof( working.json[p] ) != 'function' )
                      {
-                        if ( typeof(this.json[i][j]) != 'function' )
+                        if ( isArray )
                         {
-                           a.push( this.json[i][j] );
+                           a = a.concat( this.findAllByRegExp( name, working.json[p] ) );
                         }
-                     }
+                        else if ( name.test(p) )
+                        {
+                           a = a.concat( working.json[p] );
+                        }
+                     }                  
                   }
-                  else
-                  {
-                     if ( this.json[i][str] )
-                     {
-                        a.push( this.json[i][str] );
-                     }
-                  }
-               }
-            }
 
-            return new JPath( a, this );
-         }
-         else if ( typeof(str) == 'function' )
+                  working = new JPath( ( a.length==0 ? null : ( ( a.length == 1) ? a[0] : a ) ), working );
+               }
+
+               return working;
+            break;
+         }   
+      }
+      
+      return new JPath( result, this );
+   },
+
+   findAllByRegExp: function( re, obj )
+   {
+      var a = new Array();
+
+      for ( var p in obj )
+      {
+         if ( typeof( obj[p] ) != 'function' && re.test(p) )
          {
-            return this.f(str);
-         }
-         else
-         {
-            return new JPath( this.json[str], this );
+            a.push( obj[p] );
          }
       }
 
-      return new JPath( null, this );
+      return a;
    },
 
    /*
@@ -150,14 +162,14 @@ JPath.prototype = {
    query: function( str )
    {
       var re = {
-         "([\\*\\@\\.a-z][a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
+         "([\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "(^|\\[|\\s)\\/" : "$1root().",
          "\\/" : '',
          "\\[" : "$(function(j){ with(j){return(",
          "\\]" : ");}}).",
          "\\(\\.":'(',
-         "(\\.)(?!\\$)":"$1json"
+         "(\\.|\\])(?!\\$)":"$1json"
       };
 
       //save quoted strings//
@@ -190,20 +202,20 @@ JPath.prototype = {
         jpath - Returns the resulting jpath object after performing find query.
 
    */
-   f: function ( f )
+   f: function ( iterator )
    {
       var a = new Array();
 
-      if ( typeof(f) == 'string' )
+      if ( typeof(iterator) == 'string' )
       {
-         f = eval('function(j){with(j){return('+f+');}}');
+         iterator = eval('function(j){with(j){return('+ iterator +');}}');
       }
 
       for ( var p in this.json )
       {
          var j = new JPath(this.json[p], this);
          j.index = p;
-         if ( f( j ) )
+         if ( iterator( j ) )
          {
             a.push( this.json[p] );
          }

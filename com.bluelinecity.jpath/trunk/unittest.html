@@ -24,6 +24,7 @@ var library = {
 			'title' : 'Harry Potter',
 			'isbn'  : '1234-1234',
 			'category' : 'Childrens',
+			'available' : '3',
 			'chapters' : [ 'Chapter 1', 'Chapter 2' ]
 		},
 		{
@@ -61,35 +62,40 @@ var jpathtests = new UnitTest({
 		this.assertEquals( this.j.root().$('name').json, 'My Library');
 		this.assertEquals( this.j.query('name'), 'My Library');
 		this.assertEquals( this.j.query('/name'), 'My Library');
+		this.assertEquals( 3, this.j.query("books").length );
+		this.assertEquals( 1, this.j.query("books[available]").length );
 	},
 
 	testMultiNode: function()
 	{
-		this.assertEquals( this.j.$('address').$('city').json, 'Springfield');
-		this.assertEquals( this.j.root().$('address').$('city').json, 'Springfield');
-		this.assertEquals( this.j.query('address/city'), 'Springfield');
-		this.assertEquals( this.j.query('/address/city'), 'Springfield');
+		this.assertEquals( this.j.$('address').$('city').json, 'Springfield','1');
+		this.assertEquals( this.j.root().$('address').$('city').json, 'Springfield','2');
+		this.assertEquals( this.j.query('address/city'), 'Springfield','3');
+		this.assertEquals( this.j.query('/address/city'), 'Springfield','4');
 	},
 
 	testPredicate: function()
 	{
-		this.assertEquals( '1234-PPPP', this.j.$('books').f(function(j){with(j){ return($('category').json=='Fiction'); }}).$('isbn').json );
-		this.assertEquals( '1234-PPPP', this.j.$('books').f("$('category').json=='Fiction'").$('isbn').json );
-		this.assertEquals( '1234-PPPP', this.j.$("books").$(2).$('isbn').json );
+		this.assertEquals( '1234-PPPP', this.j.$('books').f(function(j){with(j){ return($('category').json=='Fiction'); }}).$('isbn').json, '1');
+		this.assertEquals( '1234-PPPP', this.j.$('books').f("$('category').json=='Fiction'").$('isbn').json , '2');
 
-		this.assertEquals( '1234-PPPP', this.j.query("books[category == 'Fiction']/isbn") );
-		this.assertEquals( '1234-PPPP', this.j.query("books[position() == 2]/isbn") );
-		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") );
-		this.assertEquals( 'Fiction books', this.j.query("categories[name == /books[last()]/category ]/description") );
-		this.assertEquals( 'Fiction books', this.j.$("categories").$(function(j){
-			with(j){
-				return( $('name').json == j.root().$('books').f(function(h){
-					with(h){
-						return( last() );
-					}
-				}).$('category').json );
-			}
-			}).$('description').json);
+		this.assertEquals( '1234-PPPP', this.j.$("books").$(2).$('isbn').json , '3');
+
+		this.assertEquals( '1234-PPPP', this.j.query("books[category == 'Fiction']/isbn") , '4');
+		this.assertEquals( '1234-PPPP', this.j.query("books[position() == 2]/isbn") , '5');
+		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") , '6');
+		this.assertEquals( 'Fiction books', this.j.$('categories').f(function(j){with(j){ return($('name').json=='Fiction'); }}).$('description').json, '6.5');
+		this.assertEquals( 'Fiction books', this.j.query("categories[name == /books[last()]/category ]/description") , '7');
+		this.assertEquals( 'Fiction books', this.j.$("categories").$(function(j)
+		{
+			return( (j.$('name').json) == (j.root().$('books').f(function(h){ return( h.last() ); }).$('category').json) );
+		}).$('description').json, '8');
+	},
+
+	testWildcard: function()
+	{
+		this.assertEquals(3 , this.j.query("*/[title]").length );
+		this.assertEquals(3 , this.j.query("bo*/[title]").length );
 	},
 
 });
