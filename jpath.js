@@ -20,30 +20,31 @@
       
       var jpath = new JPath( myjsonobj );
 
-      var somevalue = jpath.$('book/title').json;
+      var somevalue = jpath.$('book/title').json;  //results in title
          //or
-      var somevalue = jpath.query('book/title');
+      var somevalue = jpath.query('book/title');   //results in title
 
-/tagname
-tagname
-* wildcard
-[] predicates
-equality
-math
-array selection
+   Supported XPath-like Syntax:
+      /tagname
+      tagname
+      * wildcard
+      [] predicates
+      equality
+      math
+      array selection
 
-Expression  	
-nodename 	   
-/ 	            
-// 	         
-. 	            
-.. 	         
-*
-nodename[0]
-nodename[last()]
-nodename[position()]
-nodename[last()-1]
-nodename[somenode > 3]/node
+      Expression  	
+      nodename 	   
+      / 	            
+      // 	         
+      . 	            
+      .. 	         
+      *
+      nodename[0]
+      nodename[last()]
+      nodename[position()]
+      nodename[last()-1]
+      nodename[somenode > 3]/node
      
 */
 
@@ -164,12 +165,13 @@ JPath.prototype = {
       var re = {
          "([\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
+         "\\.\\." : "parent().",
          "(^|\\[|\\s)\\/" : "$1root().",
          "\\/" : '',
          "\\[" : "$(function(j){ with(j){return(",
          "\\]" : ");}}).",
          "\\(\\.":'(',
-         "(\\.|\\])(?!\\$)":"$1json"
+         "(\\.|\\])(?!\\$|\\p)":"$1json"
       };
 
       //save quoted strings//

@@ -86,6 +86,7 @@ var jpathtests = new UnitTest({
 		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") , '6');
 		this.assertEquals( 'Fiction books', this.j.$('categories').f(function(j){with(j){ return($('name').json=='Fiction'); }}).$('description').json, '6.5');
 		this.assertEquals( 'Fiction books', this.j.query("categories[name == /books[last()]/category ]/description") , '7');
+		this.assertEquals( 'Fiction books', this.j.query("categories[name == ../../books[last()]/category ]/description") , '7.5');
 		this.assertEquals( 'Fiction books', this.j.$("categories").$(function(j)
 		{
 			return( (j.$('name').json) == (j.root().$('books').f(function(h){ return( h.last() ); }).$('category').json) );
