@@ -1,0 +1,102 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title> UnitTests </title>
+<script type="text/javascript" src="unittest.js" /></script>
+<script type="text/javascript" src="jpath.js" /></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+var library = {
+	'name' :'My Library',
+	'@open' : '2007-17-7',
+	'address' : {
+		'city' : 'Springfield',
+		'zip' : '12345',
+		'state' : 'MI',
+		'street' : 'Mockingbird Lane'
+	    },
+	'books':[
+		{
+			'title' : 'Harry Potter',
+			'isbn'  : '1234-1234',
+			'category' : 'Childrens',
+			'chapters' : [ 'Chapter 1', 'Chapter 2' ]
+		},
+		{
+			'title' : 'Brief History of time',
+			'isbn'  : '1234-ABCD',
+			'category' : 'Science',
+			'chapters' : [ '1', '2' ]
+		},
+		{
+			'title' : 'Lord of the Rings',
+			'isbn'  : '1234-PPPP',
+			'category' : 'Fiction',
+			'chapters' : [ 'Section 1', 'Section 2' ]
+		}
+	],
+
+	'categories' : [
+		{'name':'Childrens', 'description':'Childrens books'},
+		{'name':'Science', 'description':'Books about science'},
+		{'name':'Fiction', 'description':'Fiction books'}
+	]
+};
+
+
+var jpathtests = new UnitTest({
+
+	setUp: function()
+	{
+		this.j = new JPath( library );
+	},
+
+	testNode: function()
+	{
+		this.assertEquals( this.j.$('name').json, 'My Library');
+		this.assertEquals( this.j.root().$('name').json, 'My Library');
+		this.assertEquals( this.j.query('name'), 'My Library');
+		this.assertEquals( this.j.query('/name'), 'My Library');
+	},
+
+	testMultiNode: function()
+	{
+		this.assertEquals( this.j.$('address').$('city').json, 'Springfield');
+		this.assertEquals( this.j.root().$('address').$('city').json, 'Springfield');
+		this.assertEquals( this.j.query('address/city'), 'Springfield');
+		this.assertEquals( this.j.query('/address/city'), 'Springfield');
+	},
+
+	testPredicate: function()
+	{
+		this.assertEquals( '1234-PPPP', this.j.$('books').f(function(j){with(j){ return($('category').json=='Fiction'); }}).$('isbn').json );
+		this.assertEquals( '1234-PPPP', this.j.$('books').f("$('category').json=='Fiction'").$('isbn').json );
+		this.assertEquals( '1234-PPPP', this.j.$("books").$(2).$('isbn').json );
+
+		this.assertEquals( '1234-PPPP', this.j.query("books[category == 'Fiction']/isbn") );
+		this.assertEquals( '1234-PPPP', this.j.query("books[position() == 2]/isbn") );
+		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") );
+		this.assertEquals( 'Fiction books', this.j.query("categories[name == /books[last()]/category ]/description") );
+		this.assertEquals( 'Fiction books', this.j.$("categories").$(function(j){
+			with(j){
+				return( $('name').json == j.root().$('books').f(function(h){
+					with(h){
+						return( last() );
+					}
+				}).$('category').json );
+			}
+			}).$('description').json);
+	},
+
+});
+
+document.write('<pre>' + jpathtests.run() + '</pre>');
+
+</script>
+
+</body>
+</html>
