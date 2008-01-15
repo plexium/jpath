@@ -16,8 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-   Usage:
-      
+   Usage:      
       var jpath = new JPath( myjsonobj );
 
       var somevalue = jpath.$('book/title').json;  //results in title
@@ -29,15 +28,8 @@
       tagname
       * wildcard
       [] predicates
-      equality
-      math
+      operators ( >=, ==, <= )
       array selection
-
-      Expression  	
-      nodename 	   
-      / 	            
-      // 	         
-      . 	            
       .. 	         
       *
       nodename[0]
@@ -133,6 +125,17 @@ JPath.prototype = {
       return new JPath( result, this );
    },
 
+   /*
+      Method: findAllByRegExp
+      Looks through a list of an object properties using a regular expression
+
+      Parameters:
+         re - regular expression, to use to search with
+         obj - object, the object to search through
+
+      Returns:
+         array - resulting properties
+   */
    findAllByRegExp: function( re, obj )
    {
       var a = new Array();
