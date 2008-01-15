@@ -276,6 +276,6 @@ JPath.prototype = {
    root: function ()
    {
       return ( this._parent ? this._parent.root() : this );
-   },
+   }
 
 };
