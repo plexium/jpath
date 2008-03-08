@@ -1,5 +1,5 @@
 /*
-   JPath 1.0 - json equivalent to xpath
+   JPath 1.0.1 - json equivalent to xpath
    Copyright (C) 2007  Bryan English <bryan at bluelinecity dot com>
 
    This program is free software; you can redistribute it and/or
@@ -37,7 +37,9 @@
       nodename[position()]
       nodename[last()-1]
       nodename[somenode > 3]/node
-     
+
+   Update Log:
+      1.0.1 - Bugfix for zero-based element selection
 */
 
 function JPath( json, parent )
@@ -76,7 +78,7 @@ JPath.prototype = {
       var result = null;
       var working = this;
 
-      if ( this.json && str )
+      if ( this.json && str !== null )
       {
          switch ( typeof(str) )
          {
