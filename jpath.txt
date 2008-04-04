@@ -1,5 +1,5 @@
 /*
-   JPath 1.0 - json equivalent to xpath
+   JPath 1.0.2 - json equivalent to xpath
    Copyright (C) 2007  Bryan English <bryan at bluelinecity dot com>
 
    This program is free software; you can redistribute it and/or
@@ -16,8 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-   Usage:
-      
+   Usage:      
       var jpath = new JPath( myjsonobj );
 
       var somevalue = jpath.$('book/title').json;  //results in title
@@ -29,15 +28,8 @@
       tagname
       * wildcard
       [] predicates
-      equality
-      math
+      operators ( >=, ==, <= )
       array selection
-
-      Expression  	
-      nodename 	   
-      / 	            
-      // 	         
-      . 	            
       .. 	         
       *
       nodename[0]
@@ -45,7 +37,10 @@
       nodename[position()]
       nodename[last()-1]
       nodename[somenode > 3]/node
-     
+
+   Update Log:
+      1.0.1 - Bugfix for zero-based element selection
+      1.0.2 - Bugfix for IE not handling eval() and returning a function
 */
 
 function JPath( json, parent )
@@ -84,7 +79,7 @@ JPath.prototype = {
       var result = null;
       var working = this;
 
-      if ( this.json && str )
+      if ( this.json && str !== null )
       {
          switch ( typeof(str) )
          {
@@ -133,6 +128,17 @@ JPath.prototype = {
       return new JPath( result, this );
    },
 
+   /*
+      Method: findAllByRegExp
+      Looks through a list of an object properties using a regular expression
+
+      Parameters:
+         re - regular expression, to use to search with
+         obj - object, the object to search through
+
+      Returns:
+         array - resulting properties
+   */
    findAllByRegExp: function( re, obj )
    {
       var a = new Array();
@@ -163,7 +169,7 @@ JPath.prototype = {
    query: function( str )
    {
       var re = {
-         "([\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
+         "([\\#\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "\\.\\." : "parent().",
          "(^|\\[|\\s)\\/" : "$1root().",
@@ -210,7 +216,7 @@ JPath.prototype = {
 
       if ( typeof(iterator) == 'string' )
       {
-         iterator = eval('function(j){with(j){return('+ iterator +');}}');
+         eval('iterator = function(j){with(j){return('+ iterator +');}}');
       }
 
       for ( var p in this.json )
