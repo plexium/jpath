@@ -1,5 +1,5 @@
 /*
-   JPath 1.0.1 - json equivalent to xpath
+   JPath 1.0.2 - json equivalent to xpath
    Copyright (C) 2007  Bryan English <bryan at bluelinecity dot com>
 
    This program is free software; you can redistribute it and/or
@@ -40,6 +40,7 @@
 
    Update Log:
       1.0.1 - Bugfix for zero-based element selection
+      1.0.2 - Bugfix for IE not handling eval() and returning a function
 */
 
 function JPath( json, parent )
@@ -215,7 +216,7 @@ JPath.prototype = {
 
       if ( typeof(iterator) == 'string' )
       {
-         iterator = eval('function(j){with(j){return('+ iterator +');}}');
+         eval('iterator = function(j){with(j){return('+ iterator +');}}');
       }
 
       for ( var p in this.json )
