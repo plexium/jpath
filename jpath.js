@@ -28,7 +28,7 @@
       tagname
       * wildcard
       [] predicates
-      operators ( >=, ==, <= )
+      operators ( >=, ==, <=, and, or )
       array selection
       .. 	         
       *
