@@ -24,7 +24,7 @@ var library = {
 			'title' : 'Harry Potter',
 			'isbn'  : '1234-1234',
 			'category' : 'Childrens',
-			'available' : '3',
+			'available' : 3,
 			'chapters' : [ 'Chapter 1', 'Chapter 2' ]
 		},
 		{
@@ -95,11 +95,12 @@ var jpathtests = new UnitTest({
 
 		this.assertEquals( '1234-PPPP', this.j.$("books").$(2).$('isbn').json , '3');
 
-		this.assertEquals( '1234-PPPP', this.j.query("books[category == 'Fiction']/isbn") , '4');
-		this.assertEquals( '1234-PPPP', this.j.query("books[position() == 2]/isbn") , '5');
+		this.assertEquals( '1234-PPPP', this.j.query("books[category = 'Fiction']/isbn") , '4');
+		this.assertEquals( '1234-PPPP', this.j.query("books[position() = 2]/isbn") , '5');
 		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") , '6');
 		this.assertEquals( '1234-1234', this.j.query("books[0]/isbn") , '7');
 
+      alert( this.j.query('/[text()]') );
       
 		this.assertEquals('Harry Potter', this.j.query("books[available >= 1 and available < 8]/title") );
 		this.assertEquals('Harry Potter', this.j.query("books[count(available) >= 1]/title"), 'count 1' );

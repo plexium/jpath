@@ -35,6 +35,7 @@
       nodename[0]
       nodename[last()]
       nodename[position()]
+      count(nodename/something)
       nodename[last()-1]
       nodename[somenode > 3]/node
 
@@ -205,6 +206,7 @@ JPath.prototype = {
       var re = {
          "\\sand\\s" : ' && ',
          "\\sor\\s" : ' || ',
+         "([^<>!=])\\=(?!\\=)" : '$1==',
          "([\\#\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\)|\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "\\.\\." : "parent().",
@@ -311,6 +313,21 @@ log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';
       return (this.index == (this._parent.json.length-1));
    },
 
+   text: function()
+   {
+      /*var a = new Array();
+      for ( p in this.json )
+      {
+         if ( typeof( this.json[p] ) != 'object' )
+         {
+            a.push( this.json[p] );
+         }
+      }
+      
+      return a;*/
+      return ( typeof( this.json ) == 'string' || typeof( this.json ) == 'number' );      
+   },
+   
    /*
       Method: count
       Returns the number in the resulting nodeset from nodeset query
