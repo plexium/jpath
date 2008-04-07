@@ -64,15 +64,14 @@ JPath.prototype = {
    parent: null,
 
    /*
-      Method: $
-      Performs a find query on the current jpath object.
+   Method: $
+   Performs a find query on the current jpath object.
 
-      Parameters:
-        str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
+   Parameters:
+      str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
 
-      Return:
-        jpath - Returns the resulting jpath object after performing find query.
-
+   Return:
+      jpath - Returns the resulting jpath object after performing find query.
    */
    '$': function ( str )
    {
@@ -129,6 +128,41 @@ JPath.prototype = {
    },
 
    /*
+   Method: $$
+   Query for all child nodes matching parameter.
+   
+   Parameters:
+      str - mixed, find query to perform. Can consist of a single nodename.
+   
+   Return:
+      JPath Object - jpath with array of resulting nodeset
+   */
+   '$$': function( str )
+   {
+      var a = new Array();
+
+      if ( !(this.json instanceof Array) )
+      {       
+         var sub = this.$(str).json 
+         if ( sub )
+         {
+            a = a.concat(sub);            
+         }
+      }
+      
+      //foreach working node property//
+      for ( var p in this.json )
+      {         
+         if ( typeof( this.json[p] ) == 'object' )
+         {            
+            a = a.concat( new JPath( this.json[p], this ).$$( str ).json );
+         }
+      }
+      
+      return new JPath( a, this );
+   },
+   
+   /*
       Method: findAllByRegExp
       Looks through a list of an object properties using a regular expression
 
@@ -169,12 +203,15 @@ JPath.prototype = {
    query: function( str )
    {
       var re = {
-         "([\\#\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
+         "\\sand\\s" : ' && ',
+         "\\sor\\s" : ' || ',
+         "([\\#\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\)|\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "\\.\\." : "parent().",
+         "(^|\\[|\\s)\\/\\/" : "$1\$",
          "(^|\\[|\\s)\\/" : "$1root().",
          "\\/" : '',
-         "\\[" : "$(function(j){ with(j){return(",
+         "\\[" : "\$(function(j){ with(j){return(",
          "\\]" : ");}}).",
          "\\(\\.":'(',
          "(\\.|\\])(?!\\$|\\p)":"$1json"
@@ -188,13 +225,18 @@ JPath.prototype = {
          saves.push( str.match(quotes)[2] ); 
          str = str.replace(quotes,'%'+ (saves.length-1) +'%');
       }
-
+var log = '';      
       for ( var e in re )
       {
+log += str + '\n';      
          str = str.replace( new RegExp(e,'ig'), re[e] );
       }
-
-      return eval('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
+log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';      
+//alert(log);
+      with ( this )
+      {
+         return eval( str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" );
+      }
    },
 
    /*
@@ -207,7 +249,7 @@ JPath.prototype = {
         inserted into a prepared function.
 
       Return:
-        jpath - Returns the resulting jpath object after performing find query.
+        jpath - Returns the resulting jpath object after performing find query consisting of the matching nodeset.
 
    */
    f: function ( iterator )
@@ -269,6 +311,35 @@ JPath.prototype = {
       return (this.index == (this._parent.json.length-1));
    },
 
+   /*
+      Method: count
+      Returns the number in the resulting nodeset from nodeset query
+      
+      Parameters:
+         nodeset - mixed, expects a nodeset, returns items in nodeset. If string, returns 1.
+         
+      Return: 
+         int - Number of nodes in the set
+   */
+   count: function( nodeset )
+   {  
+      if ( !nodeset )
+      {
+         return 0;
+      }
+      
+      if ( typeof(nodeset) == 'object' && !(nodeset instanceof Array) )
+      {
+         var a = new Array();
+         for ( p in nodeset )
+         {
+            a.push(p);
+         }
+      }
+      
+      return ( (nodeset instanceof Array) ? nodeset.length : 1 )
+   },
+   
    /*
       Method: root
       Returns the root jpath object.

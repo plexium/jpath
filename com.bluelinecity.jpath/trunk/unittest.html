@@ -72,6 +72,20 @@ var jpathtests = new UnitTest({
 		this.assertEquals( this.j.root().$('address').$('city').json, 'Springfield','2');
 		this.assertEquals( this.j.query('address/city'), 'Springfield','3');
 		this.assertEquals( this.j.query('/address/city'), 'Springfield','4');
+      this.assertEquals( this.j.$$('category').json[0], 'Childrens', 5 ) ;
+      this.assertEquals( this.j.$$('category').json.length, 3, 6 ) ;
+      this.assertEquals( this.j.$$('categories').$('name').json.length, 3, 6 ) ;
+      this.assertEquals( this.j.$$('categories').$('name').json[0], 'Childrens', 7 ) ;
+
+      this.assertEquals( this.j.$('books').$$('title').json[0], 'Harry Potter', 7 ) ;
+      
+      this.assertEquals( this.j.query('//category')[0], 'Childrens', 5 ) ;
+      this.assertEquals( this.j.query('//category').length, 3, 6 ) ;
+      this.assertEquals( this.j.query('//categories/name').length, 3, 6 ) ;
+      this.assertEquals( this.j.query('//categories/name')[0], 'Childrens', 7 ) ;
+
+      this.assertEquals( this.j.query('/books//title')[0], 'Harry Potter', 7 ) ;
+      
 	},
 
 	testPredicate: function()
@@ -84,6 +98,18 @@ var jpathtests = new UnitTest({
 		this.assertEquals( '1234-PPPP', this.j.query("books[category == 'Fiction']/isbn") , '4');
 		this.assertEquals( '1234-PPPP', this.j.query("books[position() == 2]/isbn") , '5');
 		this.assertEquals( '1234-PPPP', this.j.query("books[last()]/isbn") , '6');
+		this.assertEquals( '1234-1234', this.j.query("books[0]/isbn") , '7');
+
+      
+		this.assertEquals('Harry Potter', this.j.query("books[available >= 1 and available < 8]/title") );
+		this.assertEquals('Harry Potter', this.j.query("books[count(available) >= 1]/title"), 'count 1' );
+		this.assertEquals(3, this.j.query("count(books)") );
+		this.assertEquals(3, this.j.query("count(books/title)") );
+
+		this.assertEquals('Harry Potter', this.j.$("books").f("count($('available').json) >= 1").$('title').json  , 'count 1' );
+		this.assertEquals(3, this.j.count( this.j.$('books').json ) );
+		this.assertEquals(3, this.j.count( this.j.$('books').$('title').json ));
+      
 		this.assertEquals( 'Fiction books', this.j.$('categories').f(function(j){with(j){ return($('name').json=='Fiction'); }}).$('description').json, '6.5');
 		this.assertEquals( 'Fiction books', this.j.query("categories[name == /books[last()]/category ]/description") , '7');
 		this.assertEquals( 'Fiction books', this.j.query("categories[name == ../../books[last()]/category ]/description") , '7.5');
@@ -91,13 +117,14 @@ var jpathtests = new UnitTest({
 		{
 			return( (j.$('name').json) == (j.root().$('books').f(function(h){ return( h.last() ); }).$('category').json) );
 		}).$('description').json, '8');
+          
 	},
 
 	testWildcard: function()
 	{
 		this.assertEquals(3 , this.j.query("*/[title]").length );
 		this.assertEquals(3 , this.j.query("bo*/[title]").length );
-	},
+	}
 
 });
 
