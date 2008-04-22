@@ -367,6 +367,10 @@ log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';
    root: function ()
    {
       return ( this._parent ? this._parent.root() : this );
-   }
+   },
 
+   count: function()
+   {
+      return this._parent.json.length;
+   }
 };
