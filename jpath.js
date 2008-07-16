@@ -28,20 +28,26 @@
       tagname
       * wildcard
       [] predicates
-      operators ( >=, ==, <=, and, or )
+      operators ( >=, ==, <= )
       array selection
       .. 	         
       *
+      and, or
       nodename[0]
       nodename[last()]
       nodename[position()]
-      count(nodename/something)
       nodename[last()-1]
       nodename[somenode > 3]/node
-
+      nodename[count() > 3]/node
+      
    Update Log:
       1.0.1 - Bugfix for zero-based element selection
       1.0.2 - Bugfix for IE not handling eval() and returning a function
+      1.0.3 - Bugfix added support for underscore and dash in query() function
+                  Added support for single equal sign in query() function
+                  Added support for count() xpath function
+                  Added support for and, or boolean expression in predicate blocks
+                  Bugfix improper use of Array.concat which was flattening arrays
 */
 
 function JPath( json, parent )
@@ -65,14 +71,15 @@ JPath.prototype = {
    parent: null,
 
    /*
-   Method: $
-   Performs a find query on the current jpath object.
+      Method: $
+      Performs a find query on the current jpath object.
 
-   Parameters:
-      str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
+      Parameters:
+        str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
 
-   Return:
-      jpath - Returns the resulting jpath object after performing find query.
+      Return:
+        jpath - Returns the resulting jpath object after performing find query.
+
    */
    '$': function ( str )
    {
@@ -111,8 +118,8 @@ JPath.prototype = {
                            a = a.concat( this.findAllByRegExp( name, working.json[p] ) );
                         }
                         else if ( name.test(p) )
-                        {
-                           a = a.concat( working.json[p] );
+                        {                        
+                           a.push( working.json[p] );
                         }
                      }                  
                   }
@@ -128,41 +135,6 @@ JPath.prototype = {
       return new JPath( result, this );
    },
 
-   /*
-   Method: $$
-   Query for all child nodes matching parameter.
-   
-   Parameters:
-      str - mixed, find query to perform. Can consist of a single nodename.
-   
-   Return:
-      JPath Object - jpath with array of resulting nodeset
-   */
-   '$$': function( str )
-   {
-      var a = new Array();
-
-      if ( !(this.json instanceof Array) )
-      {       
-         var sub = this.$(str).json 
-         if ( sub )
-         {
-            a = a.concat(sub);            
-         }
-      }
-      
-      //foreach working node property//
-      for ( var p in this.json )
-      {         
-         if ( typeof( this.json[p] ) == 'object' )
-         {            
-            a = a.concat( new JPath( this.json[p], this ).$$( str ).json );
-         }
-      }
-      
-      return new JPath( a, this );
-   },
-   
    /*
       Method: findAllByRegExp
       Looks through a list of an object properties using a regular expression
@@ -204,19 +176,19 @@ JPath.prototype = {
    query: function( str )
    {
       var re = {
-         "\\sand\\s" : ' && ',
-         "\\sor\\s" : ' || ',
-         "([^<>!=])\\=(?!\\=)" : '$1==',
-         "([\\#\\*\\@a-z][\\*a-z0-9]*)(?=(?:\\)|\\s|$|\\[|\\]|\\/))" : "\$('$1').",
+         " and ":" && ",
+         " or ":" || ",
+         "([\\#\\*\\@a-z\\_][\\*a-z0-9_\\-]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "\\.\\." : "parent().",
-         "(^|\\[|\\s)\\/\\/" : "$1\$",
          "(^|\\[|\\s)\\/" : "$1root().",
          "\\/" : '',
-         "\\[" : "\$(function(j){ with(j){return(",
+         "([^\\=\\>\\<\\!])\\=([^\\=])" : '$1==$2',
+         "\\[" : "$(function(j){ with(j){return(",
          "\\]" : ");}}).",
          "\\(\\.":'(',
-         "(\\.|\\])(?!\\$|\\p)":"$1json"
+         "(\\.|\\])(?!\\$|\\p)":"$1json",
+         "count\\(([^\\)]+)\\)":"count('$1')"
       };
 
       //save quoted strings//
@@ -227,18 +199,14 @@ JPath.prototype = {
          saves.push( str.match(quotes)[2] ); 
          str = str.replace(quotes,'%'+ (saves.length-1) +'%');
       }
-var log = '';      
+
       for ( var e in re )
       {
-log += str + '\n';      
          str = str.replace( new RegExp(e,'ig'), re[e] );
       }
-log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';      
-//alert(log);
-      with ( this )
-      {
-         return eval( str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" );
-      }
+    // alert('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
+
+      return eval('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
    },
 
    /*
@@ -251,7 +219,7 @@ log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';
         inserted into a prepared function.
 
       Return:
-        jpath - Returns the resulting jpath object after performing find query consisting of the matching nodeset.
+        jpath - Returns the resulting jpath object after performing find query.
 
    */
    f: function ( iterator )
@@ -313,50 +281,22 @@ log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';
       return (this.index == (this._parent.json.length-1));
    },
 
-   text: function()
-   {
-      /*var a = new Array();
-      for ( p in this.json )
-      {
-         if ( typeof( this.json[p] ) != 'object' )
-         {
-            a.push( this.json[p] );
-         }
-      }
-      
-      return a;*/
-      return ( typeof( this.json ) == 'string' || typeof( this.json ) == 'number' );      
-   },
-   
    /*
       Method: count
-      Returns the number in the resulting nodeset from nodeset query
-      
+      Returns the count of child nodes in the current node
+
       Parameters:
-         nodeset - mixed, expects a nodeset, returns items in nodeset. If string, returns 1.
-         
-      Return: 
-         int - Number of nodes in the set
+         string - optional node name to count, defaults to all
+      
+      Return:
+        booean - Returns number of child nodes found
    */
-   count: function( nodeset )
-   {  
-      if ( !nodeset )
-      {
-         return 0;
-      }
-      
-      if ( typeof(nodeset) == 'object' && !(nodeset instanceof Array) )
-      {
-         var a = new Array();
-         for ( p in nodeset )
-         {
-            a.push(p);
-         }
-      }
-      
-      return ( (nodeset instanceof Array) ? nodeset.length : 1 )
+   count: function(n)
+   {
+      var found = this.$( n || '*').json;         
+      return ( found ? ( found instanceof Array ? found.length : 1 ) : 0 );
    },
-   
+
    /*
       Method: root
       Returns the root jpath object.
@@ -367,10 +307,6 @@ log += str.replace(/\%(\d+)\%/g,'saves[$1]') + ";" + '\n';
    root: function ()
    {
       return ( this._parent ? this._parent.root() : this );
-   },
-
-   count: function()
-   {
-      return this._parent.json.length;
    }
+
 };
