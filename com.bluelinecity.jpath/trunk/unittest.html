@@ -65,28 +65,28 @@ var jpathtests = new UnitTest({
 		this.assertEquals( 3, this.j.query("books").length );
 		this.assertEquals( 1, this.j.query("books[available]").length );
 	},
-/*
+
 	testMultiNode: function()
 	{
 		this.assertEquals( this.j.$('address').$('city').json, 'Springfield','1');
 		this.assertEquals( this.j.root().$('address').$('city').json, 'Springfield','2');
 		this.assertEquals( this.j.query('address/city'), 'Springfield','3');
 		this.assertEquals( this.j.query('/address/city'), 'Springfield','4');
-      this.assertEquals( this.j.$$('category').json[0], 'Childrens', 5 ) ;
+      this.assertEquals( this.j.$$('category').json, 'Childrens', 5 ) ;
       this.assertEquals( this.j.$$('category').json.length, 3, 6 ) ;
-      this.assertEquals( this.j.$$('categories').$('name').json.length, 3, 6 ) ;
-      this.assertEquals( this.j.$$('categories').$('name').json[0], 'Childrens', 7 ) ;
+      this.assertEquals( this.j.$$('categories').$('name').json, 3, 6 ) ;
+      this.assertEquals( this.j.$$('categories').$('name').json, 'Childrens', 7 ) ;
 
-      this.assertEquals( this.j.$('books').$$('title').json[0], 'Harry Potter', 7 ) ;
+      this.assertEquals( this.j.$('books').$$('title').json, 'Harry Potter', 7 ) ;
       
-      this.assertEquals( this.j.query('//category')[0], 'Childrens', 5 ) ;
-      this.assertEquals( this.j.query('//category').length, 3, 6 ) ;
-      this.assertEquals( this.j.query('//categories/name').length, 3, 6 ) ;
-      this.assertEquals( this.j.query('//categories/name')[0], 'Childrens', 7 ) ;
+      this.assertEquals( this.j.query('//category'), 'Childrens', 5 ) ;
+      this.assertEquals( this.j.query('//category'), 3, 6 ) ;
+      this.assertEquals( this.j.query('//categories/name'), 3, 6 ) ;
+      this.assertEquals( this.j.query('//categories/name'), 'Childrens', 7 ) ;
 
-      this.assertEquals( this.j.query('/books//title')[0], 'Harry Potter', 7 ) ;
+      this.assertEquals( this.j.query('/books//title'), 'Harry Potter', 7 ) ;
       
-	},*/
+	},
 
 	testPredicate: function()
 	{

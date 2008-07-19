@@ -135,6 +135,18 @@ JPath.prototype = {
       return new JPath( result, this );
    },
 
+   '$$': function( str, arr )
+   {
+      arr = arr || new Array();
+      var found = this.$(str);
+      for ( i=0;i<found.length;i++ )
+      {
+         
+      }
+      
+      return new JPath(new Array(), this);
+   },
+   
    /*
       Method: findAllByRegExp
       Looks through a list of an object properties using a regular expression
