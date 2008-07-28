@@ -1,5 +1,5 @@
 /*
-   JPath 1.0.2 - json equivalent to xpath
+   JPath 1.0.3 - json equivalent to xpath
    Copyright (C) 2007  Bryan English <bryan at bluelinecity dot com>
 
    This program is free software; you can redistribute it and/or
@@ -25,6 +25,7 @@
 
    Supported XPath-like Syntax:
       /tagname
+      //tagname
       tagname
       * wildcard
       [] predicates
@@ -39,15 +40,20 @@
       nodename[last()-1]
       nodename[somenode > 3]/node
       nodename[count() > 3]/node
-      
+
+   Tested With:
+      Firefox 2-3, IE 6-7
+   
    Update Log:
       1.0.1 - Bugfix for zero-based element selection
       1.0.2 - Bugfix for IE not handling eval() and returning a function
       1.0.3 - Bugfix added support for underscore and dash in query() function
+                  Bugfix improper use of Array.concat which was flattening arrays
                   Added support for single equal sign in query() function
                   Added support for count() xpath function
                   Added support for and, or boolean expression in predicate blocks
-                  Bugfix improper use of Array.concat which was flattening arrays
+                  Added support for global selector $$ and //
+                  Added support for wildcard (*) selector support 
 */
 
 function JPath( json, parent )
@@ -85,7 +91,7 @@ JPath.prototype = {
    {
       var result = null;
       var working = this;
-
+      
       if ( this.json && str !== null )
       {
          switch ( typeof(str) )
@@ -104,7 +110,7 @@ JPath.prototype = {
                //foreach slash delimited node name//
                for ( var i=0; i<names.length ; i++ )
                {
-                  var name = new RegExp('^' + names[i].replace(/\*/g,'.*') + '$');
+                  var name = new RegExp('^' + names[i].replace(/\*/g,'.*') + '$');                  
                   var isArray = (working.json instanceof Array);
                   var a = new Array();
                   
@@ -113,7 +119,7 @@ JPath.prototype = {
                   {
                      if ( typeof( working.json[p] ) != 'function' )
                      {
-                        if ( isArray )
+                        if ( isArray && (arguments.callee.caller != this.$$) )
                         {
                            a = a.concat( this.findAllByRegExp( name, working.json[p] ) );
                         }
@@ -135,16 +141,36 @@ JPath.prototype = {
       return new JPath( result, this );
    },
 
-   '$$': function( str, arr )
-   {
-      arr = arr || new Array();
-      var found = this.$(str);
-      for ( i=0;i<found.length;i++ )
-      {
+   /*
+      Method: $$
+      Performs a global, recursive find query on the current jpath object.
+
+      Parameters:
+        str - mixed, find query to perform. Can consist of a nodename or nodename path or function object or integer.
+
+      Return:
+        jpath - Returns the resulting jpath object after performing find query.
+
+   */   
+   '$$': function( str )
+   {   
+      var r = this.$(str,true).json;
+      var arr = new Array();
+      
+      if ( r instanceof Array ) 
+         arr = arr.concat(r); 
+      else if ( r !== null )
+         arr.push(r);
          
+      for ( var p in this.json )
+      {
+         if ( typeof( this.json[p] ) == 'object' )
+         {
+            arr = arr.concat( new JPath( this.json[p], this ).$$(str).json );
+         }
       }
       
-      return new JPath(new Array(), this);
+      return new JPath( arr, this );
    },
    
    /*
@@ -161,10 +187,14 @@ JPath.prototype = {
    findAllByRegExp: function( re, obj )
    {
       var a = new Array();
-
+   
       for ( var p in obj )
       {
-         if ( typeof( obj[p] ) != 'function' && re.test(p) )
+         if ( obj instanceof Array )
+         {
+            a = a.concat( this.findAllByRegExp( re, obj[p] ) );
+         }
+         else if ( typeof( obj[p] ) != 'function' && re.test(p) )
          {
             a.push( obj[p] );
          }
@@ -193,6 +223,7 @@ JPath.prototype = {
          "([\\#\\*\\@a-z\\_][\\*a-z0-9_\\-]*)(?=(?:\\s|$|\\[|\\]|\\/))" : "\$('$1').",
          "\\[([0-9])+\\]" : "\$($1).",
          "\\.\\." : "parent().",
+         "\/\/" : "$",
          "(^|\\[|\\s)\\/" : "$1root().",
          "\\/" : '',
          "([^\\=\\>\\<\\!])\\=([^\\=])" : '$1==$2',
@@ -216,7 +247,7 @@ JPath.prototype = {
       {
          str = str.replace( new RegExp(e,'ig'), re[e] );
       }
-    // alert('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
+      //alert('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
 
       return eval('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
    },
