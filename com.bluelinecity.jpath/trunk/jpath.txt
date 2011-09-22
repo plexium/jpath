@@ -1,6 +1,6 @@
 /*
-   JPath 1.0.4 - json equivalent to xpath
-   Copyright (C) 2009  Bryan English <bryan at bluelinecity dot com>
+   JPath 1.0.5 - json equivalent to xpath
+   Copyright (C) 2009-2011  Bryan English <bryan at bluelinecity dot com>
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,8 @@
                   Added support for and, or boolean expression in predicate blocks
                   Added support for global selector $$ and //
                   Added support for wildcard (*) selector support 
-		1.0.4 - Changed to MIT license
+	  1.0.4 - Changed to MIT license
+	  1.0.5 - Bugfix for greedy regexp
 */
 
 function JPath( json, parent )
@@ -240,7 +241,7 @@ JPath.prototype = {
       };
 
       //save quoted strings//
-      var quotes = /(\'|\")([^\1]*)\1/;
+      var quotes = /(\'|\")([^\1]*?)\1/;
       var saves = new Array();
       while ( quotes.test(str) )
       {
@@ -253,7 +254,6 @@ JPath.prototype = {
          str = str.replace( new RegExp(e,'ig'), re[e] );
       }
       //alert('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
-
       return eval('this.' + str.replace(/\%(\d+)\%/g,'saves[$1]') + ";");
    },
 
