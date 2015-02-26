@@ -1,0 +1,63 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title> UnitTests </title>
+<script type="text/javascript" src="jpath.js" /></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+var library = {
+	'name' :'My Library',
+	'@open' : '2007-17-7',
+	'address' : {
+		'city' : 'Springfield',
+		'zip' : '12345',
+		'state' : 'MI',
+		'street' : 'Mockingbird Lane'
+	    },
+	'books':[
+		{
+			'title' : 'Harry Potter',
+			'isbn'  : '1234-1234',
+			'category' : 'Childrens',
+			'available' : 3,
+			'chapters' : [ 'Chapter 1', 'Chapter 2' ]
+		},
+		{
+			'title' : 'Brief History of time',
+			'isbn'  : '1234-ABCD',
+			'category' : 'Science',
+			'chapters' : [ 
+			   {'name': 'Chapter 1',
+				'contents': 'A lot of paragraphs'
+			   },
+			   {'name': 'Chapter 2',
+				'contents': 'Also a lot of paragrahps'
+			   }
+			  ]			
+		},
+		{
+			'title' : 'Lord of the Rings',
+			'isbn'  : '1234-PPPP',
+			'category' : 'Fiction',
+			'chapters' : [ 'Section 1', 'Section 2' ]
+		}
+	],
+
+	'categories' : [
+		{'name':'Childrens', 'description':'Childrens books'},
+		{'name':'Science', 'description':'Books about science'},
+		{'name':'Fiction', 'description':'Fiction books'}
+	]
+};
+
+j = new JPath(library);
+alert(j.query('books[title == "Brief History of time"][0]/chapters[name == "Chapter 1"][0]/contents'));  
+
+</script>
+
+</body>
+</html>

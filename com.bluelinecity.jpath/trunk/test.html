@@ -13,43 +13,56 @@
 
 <script>
 
-var myobj = {
-	'rss':{
-		'@version':1.5,
-		'@ns':'red',
-		'@max':500,
-		'item':[
-			{ 'title' : 'the first blog of the day',
-			  'url' : 'http://bluelinecity.com/2007/12/12/hih',
-			  'pubDate' : '2006-12-12',
-			  'active' : false,
-			  'enclosure' : {
-					'@url' : 'http://bluelinecity.com/_files/3.mp3',
-					'@filesize' : 23
-			  },
-			},
-			{ 'title' : 'the second blog of the day',
-			  'url' : 'http://bluelinecity.com/2007/12/12/hih',
-			  'pubDate' : '2007-12-12',
-			  'active' : true,
-			  'enclosure' : {
-					'@url' : 'http://bluelinecity.com/_files/5.mp3',
-					'@filesize' : 234
-			  },
-         },
-			{ 'title' : 'the third blog of the day',
-			  'url' : 'http://bluelinecity.com/2007/12/12/423',
-			  'pubDate' : '2008-12-12',
-			  'active' : true,
-			  'enclosure' : {
-					'@url' : 'http://bluelinecity.com/_files/6.mp3',
-					'@filesize' : 2343
-			  },
-			}
-		]
-	}
-};
+var myobj = [
+{
+    "dataOptions": {
+        "id": "id1",
+        "count": "10"
+    },
+    "name": "Leon",
+    "children": [
+        {
+            "dataOptions": {
+                "id": "id2",
+                "count": "10"
+            },
+            "name": "Leon",
+            "children": [],
+            "isExpanded": false
+        },
+        {
+            "dataOptions": {
+                "id": "id2",
+                "count": "10"
+            },
+            "name": "Leon",
+            "children": [],
+            "isExpanded": false
+        }
+    ],
+    "isExpanded": false
+},
+{
+    "dataOptions": {
+        "id": "id3",
+        "count": "10"
+    },
+    "name": "Leon",
+    "children": [],
+    "isExpanded": false
+},
+{
+    "dataOptions": {
+        "id": "id4",
+        "count": "10"
+    },
+    "name": "Leon",
+    "children": [],
+    "isExpanded": false
+}
 
+];
+/*
 function pr (v){document.write(v + '<br>'); }
 
 pr(myobj.rss['@version']);
@@ -98,6 +111,14 @@ anything that matches /node/node]
 //pr(js.query('/rss/item[active]/title'));
 
 // query('rss/item/[acti]/title
+
+var jp = new JPath(myobj);
+
+test = jp.$$('*').$(function(n){ return(n.$('dataOptions/id').json == 'id2'); }).json;
+test = jp.query('//*[dataOptions/id = "id2"]');
+
+alert(test[0].name);
+
 
 </script>
 
