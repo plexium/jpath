@@ -124,86 +124,95 @@ _(JPath) new JPath( object json [, JPath parent ] );_
 > Creates a new JPath object embedded with the passed json object. The second parameter is used by internal functions to create an 
 > object trail when chaining the methods.
 
-(object) JPath.json
+_(object) JPath.json_
 
-This property holds the current json object we want to traverse.
+> This property holds the current json object we want to traverse.
 
-(JPath) JPath.$( mixed name );
+_(JPath) JPath.$( mixed name );_
 
-Main query method. This method can accept a string, number or function. Based on what is passed determines what action is taken.
+> Main query method. This method can accept a string, number or function. Based on what is passed determines what action is taken.
 
-String – Will look at the current json property for a property named name or, in the case the current object is an array, through an array of objects for all properties named name as a new JPath object.
+> String – Will look at the current json property for a property named name or, in the case the current object is an array, 
+> through an array of objects for all properties named name as a new JPath object.
 
-Number – Will look at the current json property as an array and return the element found at name as a new JPath object.
+> Number – Will look at the current json property as an array and return the element found at name as a new JPath object.
 
-Function – Will use the function as an iterator to use on every property found within the json object. The function must accept one parameter — a json object wrapped in a JPath object. The iterator must return a boolean true/false determining if the property in particular should be returned in the nodeset. As always, the result will be an array wrapped in a new JPath object.
+> Function – Will use the function as an iterator to use on every property found within the json object. 
+> The function must accept one parameter — a json object wrapped in a JPath object. The iterator must return 
+> a boolean true/false determining if the property in particular should be returned in the nodeset. As always, 
+> the result will be an array wrapped in a new JPath object.
 
-(JPath) JPath.$$( mixed name );
+_(JPath) JPath.$$( mixed name );_
 
-Global query method. This method can accept a string, number or function. Based on what is passed determines what action is taken.
+> Global query method. This method can accept a string, number or function. Based on what is passed determines what action is taken.
 
-String – Will recursivly look at the current json property for a property named name or, in the case the current object is an array, through an array of objects for all properties named name as a new JPath object.
+> String – Will recursivly look at the current json property for a property named name or, in the case the current object
+> is an array, through an array of objects for all properties named name as a new JPath object.
 
-Number – Will recursivly look at the current json property as an array and return the element found at name as a new JPath object.
+> Number – Will recursivly look at the current json property as an array and return the element found at name as a new JPath object.
 
-Function – Will recursivly use the function as an iterator to use on every property found within the json object. The function must accept one parameter — a json object wrapped in a JPath object. The iterator must return a boolean true/false determining if the property in particular should be returned in the nodeset. As always, the result will be an array wrapped in a new JPath object.
+> Function – Will recursivly use the function as an iterator to use on every property found within the json object. 
+> The function must accept one parameter — a json object wrapped in a JPath object. The iterator must return a boolean 
+> true/false determining if the property in particular should be returned in the nodeset. As always, the result will 
+> be an array wrapped in a new JPath object.
 
-(JPath) JPath.f( mixed iterator );
+_(JPath) JPath.f( mixed iterator );_
 
-This is an alternative way to use a function to select json nodes.
+> This is an alternative way to use a function to select json nodes.
 
-As a shortcut, this function will accept a string and treat it as the guts of an iterator.
+> As a shortcut, this function will accept a string and treat it as the guts of an iterator.
 
-Example:
+> Example:
 
-f("position() > 1 && $('name').json != null")
-will become
+        f("position() > 1 && $('name').json != null")
+        will become
+        
+        function(j){
+           with(j){
+              return( position() > 1 && $('name').json != null )
+           }
+        }
 
-function(j){
-   with(j){
-      return( position() > 1 && $('name').json != null )
-   }
-}
-(mixed) JPath.query( string path );
+_(mixed) JPath.query( string path );_
 
-Perform an XPath like query. Currently supported XPath commands…
+> Perform an XPath like query. Currently supported XPath commands…
 
-/tagname
-//tagname
-tagname
-* wildcard
-[] predicates
-operators ( >=, ==, <= )
-array selection
-..
-*
-and, or
-nodename[0]
-nodename[last()]
-nodename[position()]
-nodename[last()-1]
-nodename[somenode > 3]/node
-nodename[count() > 3]/node
-(JPath) JPath.root();
+        /tagname
+        //tagname
+        tagname
+        * wildcard
+        [] predicates
+        operators ( >=, ==, <= )
+        array selection
+        ..
+        *
+        and, or
+        nodename[0]
+        nodename[last()]
+        nodename[position()]
+        nodename[last()-1]
+        nodename[somenode > 3]/node
+        nodename[count() > 3]/node
+        (JPath) JPath.root();
 
-Returns a root JPath object, equivalent to “/” in XPath.
+> Returns a root JPath object, equivalent to “/” in XPath.
 
-(JPath) JPath.parent();
+_(JPath) JPath.parent();_
 
-Returns the parent json object wrapped in JPath. Equivalent to “..” in XPath.
+> Returns the parent json object wrapped in JPath. Equivalent to “..” in XPath.
 
-(boolean) JPath.last();
+_(boolean) JPath.last();_
 
-Only available within a function iterator or the “[]” predicate, returns true if the currently processing node is the last.
+> Only available within a function iterator or the “[]” predicate, returns true if the currently processing node is the last.
 
-(number) JPath.position();
+_(number) JPath.position();_
 
-Only available within a function iterator or the “[]” predicate, returns the index of the currently processing node.
+> Only available within a function iterator or the “[]” predicate, returns the index of the currently processing node.
 
-(number) JPath.count( nodename );
+_(number) JPath.count( nodename );_
 
-Only available within a function iterator or the “[]” predicate, returns the number of the nodes named nodename.
+> Only available within a function iterator or the “[]” predicate, returns the number of the nodes named nodename.
 
-(Array) JPath.findAllByRegExp( RegExp re, object obj )
+_(Array) JPath.findAllByRegExp( RegExp re, object obj )_
 
-Utility function for searching through an object using a regular expression. For internal use.
+> Utility function for searching through an object using a regular expression. For internal use.
