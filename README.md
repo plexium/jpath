@@ -2,7 +2,7 @@
 
 _XPath for JSON_
 
-JPath i* s a simple lightweight Javascript Class which provides an XPath-like querying ability to JSON objects.
+JPath is a simple lightweight Javascript Class which provides an XPath-like querying ability to JSON objects.
 
 ## Features
 
